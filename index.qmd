@@ -1,0 +1,13 @@
+---
+title: "Jiahao Li"
+image: "images/profile_pic.jpeg"
+about: 
+    template: solana
+    links: 
+      - icon: envelope
+        href: allenli0771@gmail.com
+      - icon: linkedin
+        href: https://www.linkedin.com/in/allen-li-929a74198/
+---
+
+Currently pursuing a Master’s in Business Analytics at the University of California, San Diego, with a strong foundation in data science, statistical modeling, and business intelligence. Passionate about leveraging data-driven insights to optimize decision-making and drive business efficiency. A collaborative problem solver with a keen eye for detail, comfortable working both independently and within teams to deliver impactful solutions. 
