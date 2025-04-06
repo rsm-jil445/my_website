@@ -19,5 +19,54 @@
     "title": "Resume",
     "section": "",
     "text": "Download PDF file."
+  },
+  {
+    "objectID": "index.html#sub-header",
+    "href": "index.html#sub-header",
+    "title": "Analysis of Cars",
+    "section": "Sub-Header",
+    "text": "Sub-Header\nHere is a plot:"
+  },
+  {
+    "objectID": "project.html",
+    "href": "project.html",
+    "title": "Analysis of Cars",
+    "section": "",
+    "text": "Let’s investigate the relationship between fuel efficiency\n\n\nHere is a plot:"
+  },
+  {
+    "objectID": "project.html#sub-header",
+    "href": "project.html#sub-header",
+    "title": "Analysis of Cars",
+    "section": "",
+    "text": "Here is a plot:"
+  },
+  {
+    "objectID": "projects.html",
+    "href": "projects.html",
+    "title": "My Projects",
+    "section": "",
+    "text": "Analysis of Cars\n\n\n\n\n\n\nJiahao\n\n\nApr 6, 2025\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "projects.html#sub-header",
+    "href": "projects.html#sub-header",
+    "title": "Analysis of Cars",
+    "section": "",
+    "text": "Here is a plot:"
+  },
+  {
+    "objectID": "projects/project1/index.html",
+    "href": "projects/project1/index.html",
+    "title": "Analysis of Cars",
+    "section": "",
+    "text": "Let’s investigate the relationship between fuel efficiency (mpg) and engine displacement (disp) from the mtcars dataset. Those variables have a correlation of r cor(mtcars$mpg, mtcars$disp) |&gt; format(digits=2).\n\n\nHere is a plot:\nmessage: false\nlibrary(tidyverse) data(mtcars) mtcars |&gt; ggplot(aes(mpg, disp)) + geom_point(color=“dodgerblue4”, size=2)"
+  },
+  {
+    "objectID": "projects/project1/index.html#sub-header",
+    "href": "projects/project1/index.html#sub-header",
+    "title": "Analysis of Cars",
+    "section": "",
+    "text": "Here is a plot:\nmessage: false\nlibrary(tidyverse) data(mtcars) mtcars |&gt; ggplot(aes(mpg, disp)) + geom_point(color=“dodgerblue4”, size=2)"
   }
 ]
