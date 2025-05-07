@@ -9,7 +9,8 @@
   {
     "listing": "/blog.html",
     "items": [
-      "/blog/Blog 1/index.html"
+      "/blog/Blog 1/index.html",
+      "/blog/Blog 2/index.html"
     ]
   }
 ]
