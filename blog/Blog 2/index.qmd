@@ -16,9 +16,10 @@ However, Blueprinty has collected data on 1,500 mature (non-startup) engineering
 
 
 ### Data
-
-```{r, message=FALSE, warning=FALSE}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 install.packages("tidyverse")
+```
+```{r, message=FALSE, warning=FALSE}
 library(readr)
 library(tidyverse)
 library(ggplot2)
@@ -26,8 +27,11 @@ library(ggplot2)
 ```
 
 ### Comparing Patents by Customer Status
-```{r}
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 blueprinty <- read_csv("/Users/daallen/Desktop/CLASSES/UCSD/MGTA495/quarto_website/blog/Blog 2/blueprinty.csv")
+```
+```{r}
 blueprinty %>%
   group_by(iscustomer) %>%
   summarise(
@@ -317,10 +321,11 @@ AirBnB is a popular platform for booking short-term rentals. In March 2017, stud
 ### Modeling Airbnb Reviews as a Proxy for Bookings
 
 We model the number of reviews (as a proxy for bookings) using a Poisson regression.
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+airbnb <- read_csv("/Users/daallen/Desktop/CLASSES/UCSD/MGTA495/quarto_website/blog/Blog 2/airbnb.csv")
+```
 
 ```{r}
-airbnb <- read_csv("/Users/daallen/Desktop/CLASSES/UCSD/MGTA495/quarto_website/blog/Blog 2/airbnb.csv")
-
 airbnb_clean <- airbnb %>%
   select(number_of_reviews, room_type, price, bathrooms, bedrooms,
          review_scores_cleanliness, review_scores_location,
