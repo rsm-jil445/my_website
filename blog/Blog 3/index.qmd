@@ -142,14 +142,11 @@ library(dplyr)
 library(mlogit)
 library(readr)
 
-# 1. Add 'alt' (1…3) within each respondent–task,
-#    then dummy‐code + center price + build a single 'chid'.
 prep_data <- conjoint_data %>%
   group_by(resp, task) %>%
     mutate(alt     = row_number()) %>%
   ungroup() %>%
   mutate(
-    # Reference levels: Hulu (H), No ads
     brand       = factor(brand, levels = c("H","N","P")),
     brand_N     = as.integer(brand == "N"),   # Netflix vs. Hulu
     brand_P     = as.integer(brand == "P"),   # Prime vs. Hulu
@@ -158,7 +155,6 @@ prep_data <- conjoint_data %>%
     chid        = as.integer(factor(paste(resp,task,sep = "_")))
   )
 
-# 2. Convert to an mlogit‐ready "long" object
 mldata <- mlogit.data(
   data    = prep_data,
   choice  = "choice",
@@ -168,7 +164,6 @@ mldata <- mlogit.data(
   id.var  = "resp"
 )
 
-# 3. Inspect the first few rows
 head(prep_data[, c("resp","task","chid","alt",
                    "brand_N","brand_P","ads","price_c","choice")])
 
@@ -178,27 +173,23 @@ head(prep_data[, c("resp","task","chid","alt",
 
 ```{r}
 negLogLik <- function(par, data) {
-  # unpack parameters
-  b_N     <- par[1]   # Netflix vs. Hulu
-  b_P     <- par[2]   # Prime vs. Hulu
-  b_ads   <- par[3]   # Ads vs. No‐ads
-  b_price <- par[4]   # Price coefficient
+
+  b_N     <- par[1]   
+  b_P     <- par[2]   
+  b_ads   <- par[3]   
+  b_price <- par[4]  
   
-  # systematic utility
   V    <- b_N     * data$brand_N +
           b_P     * data$brand_P +
           b_ads   * data$ads     +
           b_price * data$price_c
   
-  # choice probabilities
   expV  <- exp(V)
   denom <- ave(expV, data$chid, FUN = sum)
   P     <- expV / denom
   
-  # log‐likelihood of observed choices
   ll    <- sum(log(P[data$choice == 1]))
   
-  # return negative for minimization
   -ll
 }
 ```
@@ -209,10 +200,8 @@ negLogLik <- function(par, data) {
 We now minimize the negative log-likelihood with BFGS and recover standard errors from the Hessian.
 
 ```{r}
-# 1. Set starting values
 init_par <- c(b_N = 0, b_P = 0, b_ads = 0, b_price = 0)
 
-# 2. Minimize negative log-likelihood
 opt_res <- optim(
   par     = init_par,
   fn      = negLogLik,
@@ -221,17 +210,14 @@ opt_res <- optim(
   hessian = TRUE
 )
 
-# 3. Extract estimates
 est      <- opt_res$par
 vcov_mat <- solve(opt_res$hessian)
 
-# 4. Compute SEs and 95% CIs
 se     <- sqrt(diag(vcov_mat))
 z      <- qnorm(0.975)
 ci_lo  <- est - z * se
 ci_hi  <- est + z * se
 
-# 5. Assemble results table
 results <- data.frame(
   Parameter = c("β_Netflix", "β_Prime", "β_Ads", "β_Price"),
   Estimate  = est,
@@ -268,19 +254,16 @@ $$
 We take 11,000 iterations, discard the first 1,000 as burn‐in, and retain 10,000 draws.
 
 ```{r}
-# 1. Log-prior
 logPrior <- function(par) {
   lp_bin   <- sum(dnorm(par[1:3], 0, sqrt(5), log = TRUE))
   lp_price <- dnorm(par[4],    0, 1,         log = TRUE)
   lp_bin + lp_price
 }
 
-# 2. Log-posterior = log-likelihood + log-prior
 logPost <- function(par, data) {
   -negLogLik(par, data) + logPrior(par)
 }
 
-# 3. MCMC settings
 n_iter  <- 11000
 burn    <- 1000
 sd_prop <- c(0.05, 0.05, 0.05, 0.005)  # proposal s.d. for (β_N, β_P, β_ads, β_price)
@@ -288,29 +271,24 @@ sd_prop <- c(0.05, 0.05, 0.05, 0.005)  # proposal s.d. for (β_N, β_P, β_ads, 
 chain <- matrix(NA, nrow = n_iter - burn, ncol = 4)
 colnames(chain) <- c("beta_N","beta_P","beta_ads","beta_price")
 
-# 4. Initialize at MLE
 current    <- est
 current_lp <- logPost(current, prep_data)
 
 set.seed(123)
 for (i in seq_len(n_iter)) {
-  # propose a random‐walk step
   proposal <- current + rnorm(4, mean = 0, sd = sd_prop)
   prop_lp  <- logPost(proposal, prep_data)
   
-  # acceptance test
   if (runif(1) < exp(prop_lp - current_lp)) {
     current    <- proposal
     current_lp <- prop_lp
   }
   
-  # record post-burn‐in samples
   if (i > burn) {
     chain[i - burn, ] <- current
   }
 }
 
-# 5. (Optional) Posterior summary
 post_means <- colMeans(chain)
 post_cis   <- apply(chain, 2, quantile, c(0.025, 0.975))
 
@@ -329,7 +307,6 @@ knitr::kable(
 Below we show the trace of the MCMC for the price coefficient and the corresponding posterior histogram (10 000 retained draws).
 
 ```{r trace-and-hist-price, fig.show="hold", fig.cap=c("Trace plot of \\(\\beta_{\\text{Price}}\\) over iterations","Posterior histogram of \\(\\beta_{\\text{Price}}\\) with posterior mean"), out.width="80%"}
-# Convert chain (matrix) to data frame for convenience
 chain_df <- as.data.frame(chain)
 
 # 1. Trace plot
@@ -347,7 +324,6 @@ abline(v = mean(chain_df$beta_price), col = "red", lwd = 2)
 Below we tabulate the posterior summaries for all four parameters and compare them to our MLE estimates.
 
 ```{r}
-# Compute posterior summaries
 post_means <- colMeans(chain)
 post_sds   <- apply(chain, 2, sd)
 post_cis   <- apply(chain, 2, quantile, c(0.025, 0.975))
