@@ -193,11 +193,7 @@ window.Quarto = {
   <li><a href="#finding-the-mle-with-optim" id="toc-finding-the-mle-with-optim" class="nav-link" data-scroll-target="#finding-the-mle-with-optim">Finding the MLE with <code>optim()</code></a></li>
   </ul></li>
   <li><a href="#estimation-via-bayesian-methods" id="toc-estimation-via-bayesian-methods" class="nav-link" data-scroll-target="#estimation-via-bayesian-methods">5. Estimation via Bayesian Methods</a></li>
-  <li><a href="#trace-plot" id="toc-trace-plot" class="nav-link" data-scroll-target="#trace-plot">1. Trace plot</a></li>
-  <li><a href="#posterior-histogram" id="toc-posterior-histogram" class="nav-link" data-scroll-target="#posterior-histogram">2. Posterior histogram</a>
-  <ul class="collapse">
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">6. Discussion</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -477,13 +473,16 @@ Note
 </section>
 <section id="estimation-via-bayesian-methods" class="level2">
 <h2 class="anchored" data-anchor-id="estimation-via-bayesian-methods">5. Estimation via Bayesian Methods</h2>
-<p>We implement a basic Metropolis–Hastings sampler to draw from the posterior of<br>
-(= (<em>{},,</em>{},,<em>{},,</em>{})).<br>
+<p>We implement a basic Metropolis–Hastings sampler to draw from the posterior of <span class="math inline">\(\boldsymbol\beta = (\beta_{\text{Netflix}},\,\beta_{\text{Prime}},\,\beta_{\text{Ads}},\,\beta_{\text{Price}})\)</span><br>
 We use priors<br>
-[ <em>{},,</em>{},,<em>{}N(0,5), </em>{}N(0,1), ]<br>
-and a random‐walk proposal<br>
-(N(0,(0.05,0.05,0.05,0.005))).<br>
-We take 11,000 iterations, discard the first 1,000 as burn‐in, and retain 10,000 draws.</p>
+<span class="math display">\[
+\beta_{\text{Netflix}},\,\beta_{\text{Prime}},\,\beta_{\text{Ads}} \sim \mathcal{N}(0,5), \quad
+\beta_{\text{Price}} \sim \mathcal{N}(0,1)
+\]</span></p>
+<p>and a random‐walk proposal<br>
+<span class="math display">\[
+\Delta \sim \mathcal{N}\left(0,\ \mathrm{diag}(0.05,\ 0.05,\ 0.05,\ 0.005)\right)
+\]</span> We take 11,000 iterations, discard the first 1,000 as burn‐in, and retain 10,000 draws.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Log-prior</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>logPrior <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
@@ -587,50 +586,61 @@ We take 11,000 iterations, discard the first 1,000 as burn‐in, and retain 10,0
 </div>
 </div>
 <p>Below we show the trace of the MCMC for the price coefficient and the corresponding posterior histogram (10 000 retained draws).</p>
-<p>```{r trace-and-hist-price, fig.show=“hold”, fig.cap=c( “Trace plot of \(\beta_{\text{Price}}\) over iterations”, “Posterior histogram of \(\beta_{\text{Price}}\) with posterior mean” ), out.width=“80%”} # Convert chain (matrix) to data frame for convenience chain_df &lt;- as.data.frame(chain)</p>
-</section>
-<section id="trace-plot" class="level1">
-<h1>1. Trace plot</h1>
-<p>plot(chain_df$beta_price, type = “l”, xlab = “Iteration”, ylab = expression(beta[Price]), main = “Trace Plot: β_Price”)</p>
-</section>
-<section id="posterior-histogram" class="level1">
-<h1>2. Posterior histogram</h1>
-<p>hist(chain_df<span class="math inline">\(beta_price, breaks = 40,
-     xlab = expression(beta[Price]),
-     main = "Posterior Distribution: β_Price")
-abline(v = mean(chain_df\)</span>beta_price), col = “red”, lwd = 2)</p>
-<pre><code>
-Below we tabulate the posterior summaries for all four parameters and compare them to our MLE estimates.
-
-
-
-
-
-::: {.cell}
-
-```{.r .cell-code}
-# Compute posterior summaries
-post_means &lt;- colMeans(chain)
-post_sds   &lt;- apply(chain, 2, sd)
-post_cis   &lt;- apply(chain, 2, quantile, c(0.025, 0.975))
-
-bayes_results &lt;- data.frame(
-  Parameter = c("β_Netflix","β_Prime","β_Ads","β_Price"),
-  PosteriorMean   = post_means,
-  PosteriorSD     = post_sds,
-  CI2.5           = post_cis[1,],
-  CI97.5          = post_cis[2,],
-  MLE_Estimate    = est,
-  MLE_SE          = se
-)
-
-knitr::kable(
-  bayes_results, 
-  digits = 3, 
-  caption = "Posterior Summaries and MLE Comparisons"
-)</code></pre>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert chain (matrix) to data frame for convenience</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>chain_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(chain)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Trace plot</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(chain_df<span class="sc">$</span>beta_price, <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Iteration"</span>, <span class="at">ylab =</span> <span class="fu">expression</span>(beta[Price]),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Trace Plot: β_Price"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Posterior histogram</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(chain_df<span class="sc">$</span>beta_price, <span class="at">breaks =</span> <span class="dv">40</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(beta[Price]),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Posterior Distribution: β_Price"</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">mean</span>(chain_df<span class="sc">$</span>beta_price), <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<table class="caption-top table">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/trace-and-hist-price-1.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>Trace plot of (_{}) over iterations</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/trace-and-hist-price-2.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>Posterior histogram of (_{}) with posterior mean</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Below we tabulate the posterior summaries for all four parameters and compare them to our MLE estimates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>post_means <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(chain)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>post_sds   <span class="ot">&lt;-</span> <span class="fu">apply</span>(chain, <span class="dv">2</span>, sd)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>post_cis   <span class="ot">&lt;-</span> <span class="fu">apply</span>(chain, <span class="dv">2</span>, quantile, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>bayes_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Parameter =</span> <span class="fu">c</span>(<span class="st">"β_Netflix"</span>,<span class="st">"β_Prime"</span>,<span class="st">"β_Ads"</span>,<span class="st">"β_Price"</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">PosteriorMean   =</span> post_means,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">PosteriorSD     =</span> post_sds,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">CI2.5           =</span> post_cis[<span class="dv">1</span>,],</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">CI97.5          =</span> post_cis[<span class="dv">2</span>,],</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">MLE_Estimate    =</span> est,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">MLE_SE          =</span> se</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  bayes_results, </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>, </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Posterior Summaries and MLE Comparisons"</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
 <caption>Posterior Summaries and MLE Comparisons</caption>
 <colgroup>
 <col style="width: 13%">
@@ -698,26 +708,38 @@ knitr::kable(
 </tbody>
 </table>
 </div>
-<p>:::</p>
+</div>
+</section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">6. Discussion</h2>
 <p>Suppose we did not know the “true” part‐worths behind our conjoint data. From our estimation results alone, we would conclude:</p>
 <ol type="1">
-<li><strong>Relative Brand Preferences</strong>
+<li><p><strong>Relative Brand Preferences</strong></p>
 <ul>
-<li>(<em>{} ) is larger than (</em>{} ), which in turn is positive relative to the reference (Hulu). This ordering implies that, all else equal, respondents prefer Netflix most, Prime next, and Hulu least. In practical terms, a Netflix offer must be priced higher (or include more ads) than a Prime offer to be equally attractive.</li>
+<li><span class="math inline">\(\hat\beta_{\text{Netflix}} \approx 0.94\)</span> is larger than <span class="math inline">\(\hat\beta_{\text{Prime}} \approx 0.50\)</span>, which in turn is positive relative to the reference (Hulu).<br>
+This ordering implies that, all else equal, respondents prefer Netflix most, Prime next, and Hulu least.<br>
+In practical terms, a Netflix offer must be priced higher (or include more ads) than a Prime offer to be equally attractive.</li>
 </ul></li>
-<li><strong>Magnitude of the Brand Effects</strong>
+<li><p><strong>Magnitude of the Brand Effects</strong></p>
 <ul>
-<li>Because (<em>{} &gt; </em>{}), the <em>marginal</em> utility gain from switching a plan to Netflix is greater than switching to Prime. In odds‐ratio form, [ = e^{0.94}, = e^{0.50}. ] Thus, Netflix commands a roughly 56% higher choice‐odds over Prime when compared to Hulu.</li>
+<li>Because <span class="math inline">\(\beta_{\text{Netflix}} &gt; \beta_{\text{Prime}}\)</span>, the <em>marginal</em> utility gain from switching a plan to Netflix is greater than switching to Prime.<br>
+In odds-ratio form:</li>
+</ul>
+<p><span class="math display">\[
+\frac{P(\text{Netflix})}{P(\text{Hulu})} = e^{0.94} \approx 2.56, \quad
+\frac{P(\text{Prime})}{P(\text{Hulu})} = e^{0.50} \approx 1.65
+\]</span></p>
+<p>Thus, Netflix commands a roughly 56% higher choice-odds over Prime when compared to Hulu.</p></li>
+<li><p><strong>Sign and Size of the Price Parameter</strong></p>
+<ul>
+<li><span class="math inline">\(\hat\beta_{\text{Price}} \approx -0.10\)</span> is significantly negative, confirming that higher prices reduce the probability of selection.<br>
+Each additional dollar reduces the odds of choosing a given plan by about 9% (i.e., <span class="math inline">\(e^{-0.10} \approx 0.90\)</span>).<br>
+This aligns with economic theory: consumers experience disutility from paying more.</li>
 </ul></li>
-<li><strong>Sign and Size of the Price Parameter</strong>
+<li><p><strong>Ad-Inclusion Effect</strong></p>
 <ul>
-<li>(_{}) is significantly negative, confirming that higher prices reduce the probability of selection. Each additional dollar reduces the odds of choosing a given plan by about 9% (i.e.&nbsp;(e^{-0.10})). This aligns with economic theory: consumers experience disutility from paying more.</li>
-</ul></li>
-<li><strong>Ad‐Inclusion Effect</strong>
-<ul>
-<li>(_{}) indicates a strong aversion to ads. Offers that include advertisements have less than half the odds of being chosen compared to ad-free plans of identical brand and price.</li>
+<li><span class="math inline">\(\hat\beta_{\text{Ads}} \approx -0.73\)</span> indicates a strong aversion to ads.<br>
+Offers that include advertisements have less than half the odds of being chosen compared to ad-free plans of identical brand and price.</li>
 </ul></li>
 </ol>
 <hr>
@@ -736,44 +758,52 @@ Yes—our signs and magnitudes align with intuitive consumer behavior:</p>
 <ol type="1">
 <li><strong>Simulation changes</strong>
 <ul>
-<li><strong>Hyper‐parameters</strong>: decide on a population mean vector () and covariance matrix ().<br>
+<li><strong>Hyper-parameters</strong>: decide on a population mean vector <span class="math inline">\(\boldsymbol\mu\)</span> and covariance matrix <span class="math inline">\(\Sigma\)</span>.<br>
 </li>
-<li><strong>Draw individual betas</strong>: for each respondent (i), simulate<br>
-[ _i (,),. ]</li>
-<li><strong>Choice simulation</strong>: use each (<em>i) in the utility [ U</em>{ij} = x_j’<em>i + </em>{ij} ] exactly as before.</li>
+<li><strong>Draw individual betas</strong>: for each respondent <span class="math inline">\(i\)</span>, simulate:<br>
+<span class="math display">\[
+\boldsymbol\beta_i \sim \mathcal{N}(\boldsymbol\mu,\Sigma)
+\]</span></li>
+<li><strong>Choice simulation</strong>: use each <span class="math inline">\(\boldsymbol\beta_i\)</span> in the utility function: <span class="math display">\[
+U_{ij} = x_j' \boldsymbol\beta_i + \varepsilon_{ij}
+\]</span> exactly as before.</li>
 </ul></li>
 <li><strong>Estimation changes</strong>
 <ul>
-<li><strong>Model specification</strong>: let<br>
-[ <em>i ,|,, ;;(,), </em>{ij}(0,1). ]</li>
+<li><strong>Model specification</strong>: assume<br>
+<span class="math display">\[
+\boldsymbol\beta_i \mid \boldsymbol\mu, \Sigma \sim \mathcal{N}(\boldsymbol\mu,\Sigma), \quad
+\varepsilon_{ij} \sim \text{Gumbel}(0,1)
+\]</span></li>
 <li><strong>Bayesian Hierarchical MCMC</strong>
 <ul>
-<li>Place priors on () and () (e.g.&nbsp;Normal–Inverse‐Wishart).<br>
+<li>Place priors on <span class="math inline">\(\boldsymbol\mu\)</span> and <span class="math inline">\(\Sigma\)</span> (e.g., Normal–Inverse–Wishart).<br>
 </li>
-<li>Gibbs or HMC sampler alternates between
+<li>Use Gibbs or HMC sampling that alternates between:
 <ol type="1">
-<li>Sampling each (_i) conditional on data and ((,)),<br>
+<li>Sampling each <span class="math inline">\(\boldsymbol\beta_i\)</span> conditional on the data and <span class="math inline">\((\boldsymbol\mu,\Sigma)\)</span><br>
 </li>
-<li>Sampling ((,)) conditional on ({_i}).<br>
+<li>Sampling <span class="math inline">\((\boldsymbol\mu,\Sigma)\)</span> conditional on <span class="math inline">\(\{\boldsymbol\beta_i\}\)</span><br>
 </li>
 </ol></li>
-<li>Many software packages (e.g.&nbsp;<strong><code>rstan</code></strong>, <strong><code>bayesm</code></strong>) automate this.</li>
+<li>This is supported in packages like <strong><code>rstan</code></strong>, <strong><code>bayesm</code></strong>, and <strong><code>brms</code></strong>.</li>
 </ul></li>
 </ul></li>
-<li><strong>Frequentist Mixed‐Logit</strong>
+<li><strong>Frequentist Mixed-Logit</strong>
 <ul>
-<li>Write the likelihood as an integral over (_i):<br>
-(L_i = <em>j P</em>{ij}(),(,),d).<br>
-</li>
-<li>Approximate via simulated maximum likelihood (e.g.&nbsp;<strong><code>mlogit</code></strong> + <strong><code>mixlogit</code></strong>).</li>
+<li>The likelihood becomes an integral over the distribution of <span class="math inline">\(\boldsymbol\beta_i\)</span>: <span class="math display">\[
+L_i = \int \prod_j P_{ij}(\boldsymbol\beta) \, \phi(\boldsymbol\beta \mid \boldsymbol\mu, \Sigma) \, d\boldsymbol\beta
+\]</span></li>
+<li>This is typically approximated via <strong>simulated maximum likelihood</strong> (e.g., using <strong><code>mlogit</code></strong> with <strong><code>mixlogit</code></strong> extension).</li>
 </ul></li>
 </ol>
 <hr>
+<p>This structure allows for <strong>heterogeneous preferences</strong>, where each individual has their own set of part-worths, drawn from a shared population distribution.</p>
+<hr>
 <p><strong>Take‐away:</strong><br>
-Moving from fixed to random coefficients requires (1) simulating individual β’s from a population distribution, and (2) estimating both the population parameters ((,)) and the individual draws—typically via hierarchical Bayesian MCMC or simulated‐ML mixed‐logit.```</p>
+Moving from fixed to random coefficients requires (1) simulating individual β’s from a population distribution, and (2) estimating both the population parameters ((,)) and the individual draws—typically via hierarchical Bayesian MCMC or simulated‐ML mixed‐logit.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

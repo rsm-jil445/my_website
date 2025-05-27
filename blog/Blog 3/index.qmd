@@ -254,16 +254,17 @@ All four part-worth estimates are highly significant (none of the 95% CIs cross 
 
 ## 5. Estimation via Bayesian Methods
 
-We implement a basic Metropolis–Hastings sampler to draw from the posterior of  
-\(\boldsymbol\beta = (\beta_{\text{Netflix}},\,\beta_{\text{Prime}},\,\beta_{\text{Ads}},\,\beta_{\text{Price}})\).  
+We implement a basic Metropolis–Hastings sampler to draw from the posterior of $\boldsymbol\beta = (\beta_{\text{Netflix}},\,\beta_{\text{Prime}},\,\beta_{\text{Ads}},\,\beta_{\text{Price}})$  
 We use priors  
-\[
-\beta_{\text{Netflix}},\,\beta_{\text{Prime}},\,\beta_{\text{Ads}}\sim N(0,5),
-\quad
-\beta_{\text{Price}}\sim N(0,1),
-\]  
+$$
+\beta_{\text{Netflix}},\,\beta_{\text{Prime}},\,\beta_{\text{Ads}} \sim \mathcal{N}(0,5), \quad
+\beta_{\text{Price}} \sim \mathcal{N}(0,1)
+$$
+
 and a random‐walk proposal  
-\(\Delta \sim N\bigl(0,\operatorname{diag}(0.05,0.05,0.05,0.005)\bigr)\).  
+$$
+\Delta \sim \mathcal{N}\left(0,\ \mathrm{diag}(0.05,\ 0.05,\ 0.05,\ 0.005)\right)
+$$ 
 We take 11,000 iterations, discard the first 1,000 as burn‐in, and retain 10,000 draws.
 
 ```{r}
@@ -327,10 +328,7 @@ knitr::kable(
 
 Below we show the trace of the MCMC for the price coefficient and the corresponding posterior histogram (10 000 retained draws).
 
-```{r trace-and-hist-price, fig.show="hold", fig.cap=c(
-  "Trace plot of \\(\\beta_{\\text{Price}}\\) over iterations",
-  "Posterior histogram of \\(\\beta_{\\text{Price}}\\) with posterior mean"
-), out.width="80%"}
+```{r trace-and-hist-price, fig.show="hold", fig.cap=c("Trace plot of \\(\\beta_{\\text{Price}}\\) over iterations","Posterior histogram of \\(\\beta_{\\text{Price}}\\) with posterior mean"), out.width="80%"}
 # Convert chain (matrix) to data frame for convenience
 chain_df <- as.data.frame(chain)
 
@@ -377,22 +375,29 @@ knitr::kable(
 Suppose we did not know the “true” part‐worths behind our conjoint data.  From our estimation results alone, we would conclude:
 
 1. **Relative Brand Preferences**  
-   - \(\hat\beta_{\text{Netflix}} \approx 0.94\) is larger than \(\hat\beta_{\text{Prime}} \approx 0.50\), which in turn is positive relative to the reference (Hulu).  This ordering implies that, all else equal, respondents prefer Netflix most, Prime next, and Hulu least.  In practical terms, a Netflix offer must be priced higher (or include more ads) than a Prime offer to be equally attractive.
+   - $\hat\beta_{\text{Netflix}} \approx 0.94$ is larger than $\hat\beta_{\text{Prime}} \approx 0.50$, which in turn is positive relative to the reference (Hulu).  
+   This ordering implies that, all else equal, respondents prefer Netflix most, Prime next, and Hulu least.  
+   In practical terms, a Netflix offer must be priced higher (or include more ads) than a Prime offer to be equally attractive.
 
 2. **Magnitude of the Brand Effects**  
-   - Because \(\beta_{\text{Netflix}} > \beta_{\text{Prime}}\), the *marginal* utility gain from switching a plan to Netflix is greater than switching to Prime.  In odds‐ratio form,
-   \[
-     \frac{P(\text{Netflix})}{P(\text{Hulu})} = e^{0.94}\approx2.56,\quad
-     \frac{P(\text{Prime})}{P(\text{Hulu})} = e^{0.50}\approx1.65.
-   \]
-   Thus, Netflix commands a roughly 56% higher choice‐odds over Prime when compared to Hulu.
+   - Because $\beta_{\text{Netflix}} > \beta_{\text{Prime}}$, the *marginal* utility gain from switching a plan to Netflix is greater than switching to Prime.  
+   In odds-ratio form:
+
+   $$
+   \frac{P(\text{Netflix})}{P(\text{Hulu})} = e^{0.94} \approx 2.56, \quad
+   \frac{P(\text{Prime})}{P(\text{Hulu})} = e^{0.50} \approx 1.65
+   $$
+
+   Thus, Netflix commands a roughly 56% higher choice-odds over Prime when compared to Hulu.
 
 3. **Sign and Size of the Price Parameter**  
-   - \(\hat\beta_{\text{Price}}\approx -0.10\) is significantly negative, confirming that higher prices reduce the probability of selection.  Each additional dollar reduces the odds of choosing a given plan by about 9% (i.e.\ \(e^{-0.10}\approx0.90\)).  This aligns with economic theory: consumers experience disutility from paying more.
+   - $\hat\beta_{\text{Price}} \approx -0.10$ is significantly negative, confirming that higher prices reduce the probability of selection.  
+   Each additional dollar reduces the odds of choosing a given plan by about 9% (i.e., $e^{-0.10} \approx 0.90$).  
+   This aligns with economic theory: consumers experience disutility from paying more.
 
-4. **Ad‐Inclusion Effect**  
-   - \(\hat\beta_{\text{Ads}}\approx -0.73\) indicates a strong aversion to ads.  Offers that include advertisements have less than half the odds of being chosen compared to ad-free plans of identical brand and price.
-
+4. **Ad-Inclusion Effect**  
+   - $\hat\beta_{\text{Ads}} \approx -0.73$ indicates a strong aversion to ads.  
+   Offers that include advertisements have less than half the odds of being chosen compared to ad-free plans of identical brand and price.
 ---
 
 **Does everything make sense?**  
@@ -409,41 +414,45 @@ Even without knowing the data‐generation process, these estimates tell a coher
 In “real‐world” conjoint we often allow each respondent to have their own part‐worths, modeled as draws from a population distribution.  Concretely:
 
 1. **Simulation changes**  
-   - **Hyper‐parameters**: decide on a population mean vector \(\boldsymbol\mu\) and covariance matrix \(\Sigma\).  
-   - **Draw individual betas**: for each respondent \(i\), simulate  
-     \[
-       \boldsymbol\beta_i \sim \mathcal{N}(\boldsymbol\mu,\Sigma)\,.
-     \]
-   - **Choice simulation**: use each \(\boldsymbol\beta_i\) in the utility
-     \[
-       U_{ij} = x_j'\boldsymbol\beta_i + \varepsilon_{ij}
-     \]
+   - **Hyper-parameters**: decide on a population mean vector $\boldsymbol\mu$ and covariance matrix $\Sigma$.  
+   - **Draw individual betas**: for each respondent $i$, simulate:  
+     $$
+     \boldsymbol\beta_i \sim \mathcal{N}(\boldsymbol\mu,\Sigma)
+     $$
+   - **Choice simulation**: use each $\boldsymbol\beta_i$ in the utility function:
+     $$
+     U_{ij} = x_j' \boldsymbol\beta_i + \varepsilon_{ij}
+     $$
      exactly as before.
 
 2. **Estimation changes**  
-   - **Model specification**: let  
-     \[
-       \boldsymbol\beta_i \,\big|\,\boldsymbol\mu,\Sigma 
-       \;\sim\;\mathcal{N}(\boldsymbol\mu,\Sigma), 
-       \quad
-       \varepsilon_{ij}\sim\mathrm{Gumbel}(0,1).
-     \]
+   - **Model specification**: assume  
+     $$
+     \boldsymbol\beta_i \mid \boldsymbol\mu, \Sigma \sim \mathcal{N}(\boldsymbol\mu,\Sigma), \quad 
+     \varepsilon_{ij} \sim \text{Gumbel}(0,1)
+     $$
    - **Bayesian Hierarchical MCMC**  
-     - Place priors on \(\boldsymbol\mu\) and \(\Sigma\) (e.g.\ Normal–Inverse‐Wishart).  
-     - Gibbs or HMC sampler alternates between  
-       1. Sampling each \(\boldsymbol\beta_i\) conditional on data and \((\boldsymbol\mu,\Sigma)\),  
-       2. Sampling \((\boldsymbol\mu,\Sigma)\) conditional on \(\{\boldsymbol\beta_i\}\).  
-     - Many software packages (e.g.\ **`rstan`**, **`bayesm`**) automate this.
+     - Place priors on $\boldsymbol\mu$ and $\Sigma$ (e.g., Normal–Inverse–Wishart).  
+     - Use Gibbs or HMC sampling that alternates between:
+       1. Sampling each $\boldsymbol\beta_i$ conditional on the data and $(\boldsymbol\mu,\Sigma)$  
+       2. Sampling $(\boldsymbol\mu,\Sigma)$ conditional on $\{\boldsymbol\beta_i\}$  
+     - This is supported in packages like **`rstan`**, **`bayesm`**, and **`brms`**.
 
-3. **Frequentist Mixed‐Logit**  
-   - Write the likelihood as an integral over \(\boldsymbol\beta_i\):  
-     \(\displaystyle L_i = \int \prod_j P_{ij}(\boldsymbol\beta)\,\phi(\boldsymbol\beta\mid\boldsymbol\mu,\Sigma)\,d\boldsymbol\beta\).  
-   - Approximate via simulated maximum likelihood (e.g.\ **`mlogit`** + **`mixlogit`**).
+3. **Frequentist Mixed-Logit**  
+   - The likelihood becomes an integral over the distribution of $\boldsymbol\beta_i$:
+     $$
+     L_i = \int \prod_j P_{ij}(\boldsymbol\beta) \, \phi(\boldsymbol\beta \mid \boldsymbol\mu, \Sigma) \, d\boldsymbol\beta
+     $$
+   - This is typically approximated via **simulated maximum likelihood** (e.g., using **`mlogit`** with **`mixlogit`** extension).
+
+---
+
+This structure allows for **heterogeneous preferences**, where each individual has their own set of part-worths, drawn from a shared population distribution.
 
 ---
 
 **Take‐away:**  
-Moving from fixed to random coefficients requires (1) simulating individual β’s from a population distribution, and (2) estimating both the population parameters (\(\boldsymbol\mu,\Sigma\)) and the individual draws—typically via hierarchical Bayesian MCMC or simulated‐ML mixed‐logit.```
+Moving from fixed to random coefficients requires (1) simulating individual β’s from a population distribution, and (2) estimating both the population parameters (\(\boldsymbol\mu,\Sigma\)) and the individual draws—typically via hierarchical Bayesian MCMC or simulated‐ML mixed‐logit.
 
 
 
